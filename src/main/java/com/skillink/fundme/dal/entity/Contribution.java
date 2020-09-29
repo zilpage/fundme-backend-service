@@ -35,6 +35,7 @@ public class Contribution implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	private long userId;
+	private long campaignId;
 	@Column(name="amount", columnDefinition="Decimal(20,2) default '00.00'")
 	private double amount;
     private String comment;
