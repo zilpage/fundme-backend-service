@@ -103,5 +103,9 @@ public class Result<T> {
 	public void setIdentityValue(Long identityValue) {
 		this.identityValue = identityValue;
 	}
-    
+
+
+    public void setNoOfRecords(Long noOfRecords) {
+        this.noOfRecords = noOfRecords;
+    }
 }
