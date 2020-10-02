@@ -1,33 +1,45 @@
 package com.skillink.fundme.api;
 
-import com.skillink.fundme.dal.entity.Permission;
-import com.skillink.fundme.dal.entity.Role;
-import com.skillink.fundme.dal.entity.User;
-import com.skillink.fundme.dto.JWTLoginSuccessResponse;
-import com.skillink.fundme.dto.LoginRequest;
-import com.skillink.fundme.exception.BadRequestException;
-import com.skillink.fundme.security.IAuthenticationFacade;
-import com.skillink.fundme.security.JwtTokenProvider;
-import com.skillink.fundme.service.MapValidationErrorService;
-import com.skillink.fundme.service.RoleService;
-import com.skillink.fundme.service.UserService;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Random;
+
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.Valid;
-
-import java.util.List;
-
-import static com.skillink.fundme.security.SecurityConstants.TOKEN_PREFIX;
+import com.skillink.fundme.dal.entity.Permission;
+import com.skillink.fundme.dal.entity.Role;
+import com.skillink.fundme.dal.entity.User;
+import com.skillink.fundme.dto.JWTLoginSuccessResponse;
+import com.skillink.fundme.dto.LoginRequest;
+import com.skillink.fundme.dto.Response;
+import com.skillink.fundme.exception.BadRequestException;
+import com.skillink.fundme.security.IAuthenticationFacade;
+import com.skillink.fundme.security.JwtTokenProvider;
+import com.skillink.fundme.service.MapValidationErrorService;
+import com.skillink.fundme.service.RoleService;
+import com.skillink.fundme.service.UserService;
+import com.skillink.fundme.util.ConstantUtil;
 
 /**
  * @author Rabiu Ademoh
@@ -77,25 +89,29 @@ public class UsersController {
         }
 
 
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                        loginRequest.getUsername(),
-                        loginRequest.getPassword()
-                )
-        );
+//        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+//                        loginRequest.getUsername(),
+//                        loginRequest.getPassword()
+//                )
+//        );
 
         Role role = roleService.getRoleById(user.getRoleId());
+        List<Permission> permissions = null;
+        if(role != null) {
+        	permissions = role.getPermissions();
 
-        List<Permission> permissions = role.getPermissions();
+            user.setPermissions(permissions);
+            user.setRole(role);
+        }
+        
 
-
-        user.setPermissions(permissions);
-        user.setRole(role);
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = TOKEN_PREFIX +  tokenProvider.generateToken(authentication);
+//        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = tokenProvider.generateToken(String.valueOf(user.getId()), user.getUsername());
 
         JWTLoginSuccessResponse jwtLoginSuccessResponse = new JWTLoginSuccessResponse(user.getLastLogin(),jwt,user.getUsername(),role,permissions);
-
+        jwtLoginSuccessResponse.setId(user.getId());
+        jwtLoginSuccessResponse.setRole(role);
+        jwtLoginSuccessResponse.setName(user.getFirstName()+" "+user.getLastName());
 
 
         return ResponseEntity.ok(jwtLoginSuccessResponse);
@@ -115,4 +131,56 @@ public class UsersController {
         return  newUser;
       //  return  new ResponseEntity<User>(newUser, HttpStatus.CREATED);
     }
+    
+    
+    
+    
+    @RequestMapping(value = "/file/upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseStatus(value = HttpStatus.OK)
+	// @PreAuthorize("hasAuthority('CREATE_PARENT_ATTATCHMENTS')")
+	public Response addAttatchment(@RequestParam("file") MultipartFile file) throws Exception {
+
+		if (file != null) {
+			if (!Arrays.asList(ConstantUtil.ALLOWED_DOCUMENT_FORMATS).contains(file.getContentType().split("/")[1])) {
+				throw new BadRequestException("400",
+						"File format not supported. Sent : " + file.getContentType().split("/")[1]);
+			}
+			
+			if(file.getSize() > 3e+7)
+				throw new BadRequestException("400",
+						"File size exceeds 30MB ");
+			try {
+				
+				String filePath = "";
+				String fileName = "file" + "_Skilllink";
+				fileName = fileName.trim().replaceAll(" ", "_");
+				byte[] bytes = file.getBytes();
+
+				Random rand = new Random();
+				String randomNo = String.valueOf(System.currentTimeMillis())+"-"+rand.nextLong();
+				fileName = fileName + randomNo + "." + getFileExtension(file.getOriginalFilename());//attachment.getDocumentBinaryType();
+				Path path = Paths.get(filePath + fileName);
+
+				Files.write(path, bytes);
+				
+				Response response = new Response();
+				response.setDescription(fileName);
+				return response;
+
+			} catch (Exception ex) {
+				throw ex;
+			}
+
+		} else {
+			throw new BadRequestException("400", "File cannot be empty");
+		}
+	}
+    
+    private String getFileExtension(String name) {
+	    int lastIndexOf = name.lastIndexOf(".");
+	    if (lastIndexOf == -1) {
+	        return ""; // empty extension
+	    }
+	    return name.substring(lastIndexOf+1);
+	}
 }

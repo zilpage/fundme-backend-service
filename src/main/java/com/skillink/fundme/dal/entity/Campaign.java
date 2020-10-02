@@ -43,6 +43,7 @@ public class Campaign implements Serializable {
     private String raiseAs;
     private String coverPhoto;
     private String story;
+    private boolean enabled;
     @Column(name = "created_at")
     private java.sql.Timestamp createdAt;
     @Column(name = "modified_at")

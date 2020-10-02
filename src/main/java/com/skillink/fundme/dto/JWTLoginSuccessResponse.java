@@ -25,6 +25,9 @@ public class JWTLoginSuccessResponse implements Serializable {
 
     @JsonProperty("Username")
     private String username;
+    
+    @JsonProperty("Name")
+    private String name;
 
 
     private boolean otp;
@@ -111,4 +114,13 @@ public class JWTLoginSuccessResponse implements Serializable {
     public void setUser(User user) {
         this.user = user;
     }
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+    
 }

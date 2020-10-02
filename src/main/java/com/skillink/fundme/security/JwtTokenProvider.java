@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,17 +28,20 @@ public class JwtTokenProvider {
     @Value("${app.jwtSecret}")
     String jwtSecret;
 
-    public String generateToken(Authentication authentication){
-        User user = (User)authentication.getPrincipal();
+    public String generateToken(String userId, String username){
+//        User user = (User)authentication.getPrincipal();
         Date now = new Date(System.currentTimeMillis());
 
-        Date expiryDate = new Date(now.getTime()+jwtExpirationTime);
+//        Date expiryDate = new Date(now.getTime()+jwtExpirationTime);
 
-        String userId = Long.toString(user.getId());
+        Calendar c= Calendar.getInstance();
+        c.add(Calendar.DATE, 90);
+        Date expiryDate=c.getTime();
+//        String userId = Long.toString(userId);
 
         Map<String,Object> claims = new HashMap<>();
-        claims.put("id", (Long.toString(user.getId())));
-        claims.put("username", user.getUsername());
+        claims.put("id", ((userId)));
+        claims.put("username", username);
 
 
         return Jwts.builder()
