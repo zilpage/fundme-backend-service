@@ -39,6 +39,10 @@ public class Contribution implements Serializable {
 	@Column(name="amount", columnDefinition="Decimal(20,2) default '00.00'")
 	private double amount;
     private String comment;
+    private String firstName;
+    private String lastName;
+    private String emailAddress;
+    private String phoneNumber;
     @Column(name = "created_at")
     private java.sql.Timestamp createdAt;
     @Column(name = "modified_at")
