@@ -2,9 +2,12 @@ package com.skillink.fundme.security;
 
 import com.skillink.fundme.service.CustomUserDetailsService;
 
+import java.io.IOException;
 import java.util.Collections;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -17,7 +20,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -62,7 +67,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
-                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
+                 .exceptionHandling().authenticationEntryPoint(unauthorizedEntryPoint()).and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
@@ -80,7 +85,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/**/*.css",
                         "/**/*.js"
                 ).permitAll()
-                .antMatchers("/api/v1/skilllink/users/**").permitAll()
+                .antMatchers("/api/v1/skilllink/users/**","/api/v1/skilllink/public/**","/api/v1/skilllink/contribution").permitAll()
                 .anyRequest().authenticated();
 
         http.cors().configurationSource(new CorsConfigurationSource() {
@@ -97,4 +102,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
     }
+    
+    @Bean
+	public AuthenticationEntryPoint unauthorizedEntryPoint() {
+		return new AuthenticationEntryPoint() {
+			@Override
+			public void commence(HttpServletRequest request, HttpServletResponse response,
+					AuthenticationException authException) throws IOException, ServletException {
+				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+			}
+		};
+	}
 }
