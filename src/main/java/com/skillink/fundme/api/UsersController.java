@@ -12,6 +12,7 @@ import java.util.Random;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -66,7 +67,10 @@ public class UsersController {
 
     @Autowired
     private IAuthenticationFacade authenticationFacade;
+    
 
+    @Value("${file.location}")
+    private String fileLocation;
 
     @RequestMapping( value = "users/login", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = HttpStatus.OK)
@@ -151,7 +155,7 @@ public class UsersController {
 						"File size exceeds 30MB ");
 			try {
 				
-				String filePath = "";
+				String filePath = fileLocation;
 				String fileName = "file" + "_Skilllink";
 				fileName = fileName.trim().replaceAll(" ", "_");
 				byte[] bytes = file.getBytes();
