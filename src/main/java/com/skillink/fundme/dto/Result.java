@@ -26,7 +26,8 @@ public class Result<T> {
     private Integer currentPageSize;
 
     private Integer currentPageNumber;
-    
+	
+    private Dashboard dashboard;
     
     public Result(){}
 
@@ -108,4 +109,13 @@ public class Result<T> {
     public void setNoOfRecords(Long noOfRecords) {
         this.noOfRecords = noOfRecords;
     }
+
+	public Dashboard getDashboard() {
+		return dashboard;
+	}
+
+	public void setDashboard(Dashboard dashboard) {
+		this.dashboard = dashboard;
+	}
+    
 }

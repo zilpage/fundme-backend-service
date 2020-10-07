@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -15,11 +16,15 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.skillink.fundme.dal.entity.Campaign;
+import com.skillink.fundme.dal.entity.Permission;
 import com.skillink.fundme.dal.entity.Role;
+import com.skillink.fundme.dto.Dashboard;
 import com.skillink.fundme.dto.Response;
 import com.skillink.fundme.dto.Result;
 import com.skillink.fundme.exception.BadRequestException;
+import com.skillink.fundme.service.AppService;
 import com.skillink.fundme.service.CampaignService;
+import com.skillink.fundme.service.ContributionService;
 import com.skillink.fundme.util.Util;
 
 @RestController
@@ -28,6 +33,12 @@ public class CampaignController {
 	
 	@Autowired
 	CampaignService campaignService;
+	
+	@Autowired
+	ContributionService contributionService;
+	
+	@Autowired
+	AppService appService;
 
 	@RequestMapping(value = "/campaign", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(value = HttpStatus.CREATED)
@@ -59,12 +70,24 @@ public class CampaignController {
 	
 	
 	
-	@RequestMapping(value = "/campaigns", method = RequestMethod.GET, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/my/campaigns", method = RequestMethod.GET, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(value = HttpStatus.OK)
 	public Result<Campaign> getAllCampaigns() throws Exception {
 		Result<Campaign> result = new Result<Campaign>();
-		List<Campaign> list = campaignService.getCampaigns();
+		List<Campaign> list = campaignService.getMyCampaigns();
 		result.setList(list);
+		return result;
+
+	}
+	
+	@RequestMapping(value = "/admin/campaigns", method = RequestMethod.GET, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseStatus(value = HttpStatus.OK)
+	public Result<Campaign> getAdminCampaigns() throws Exception {
+		Result<Campaign> result = new Result<Campaign>();
+		List<Campaign> list = campaignService.getAdminCampaigns();
+		result.setList(list);
+		Dashboard dashboard = appService.getDshboardStatistics();
+		result.setDashboard(dashboard);
 		return result;
 
 	}
@@ -93,5 +116,23 @@ public class CampaignController {
 		
 		return response;
 
+	}
+	
+	
+	
+	
+	@RequestMapping(value = "/campaign/{id}", method = RequestMethod.GET, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseStatus(value = HttpStatus.OK)
+	public Campaign getCampaignById(@PathVariable long id) throws Exception {
+
+		if (id == 0)
+			throw new BadRequestException("400", " ID cannot be empty");
+
+		Campaign campaign = campaignService.getCampaignById(id);
+		if (campaign == null) {
+			throw new BadRequestException("400", "Campaign does not exist");
+		}
+		campaign.setContributions(contributionService.getContributionsByCampaignId(id));
+		return campaign;
 	}
 }

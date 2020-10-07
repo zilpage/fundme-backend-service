@@ -78,4 +78,20 @@ public class ContributionService {
    }
    
    
+   public List<Contribution> getContributionsByCampaignId(long id) throws Exception
+   {
+       try {
+    	   String sql = "SELECT * FROM tbl_contribution  where campaign_id = ?  order by id desc ";
+    	   
+			RowMapper<Contribution> rowMapper = new BeanPropertyRowMapper<Contribution>(Contribution.class);
+			List<Contribution> list = jdbcTemplate.query(sql, rowMapper, id);
+			return list;
+       }catch (Exception ex){
+           LoggerUtil.logError(logger,ex);
+           throw ex;
+       }
+
+
+   }
+   
 }

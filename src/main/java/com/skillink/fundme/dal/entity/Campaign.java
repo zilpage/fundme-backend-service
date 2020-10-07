@@ -3,6 +3,7 @@ package com.skillink.fundme.dal.entity;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -48,6 +50,10 @@ public class Campaign implements Serializable {
     private java.sql.Timestamp createdAt;
     @Column(name = "modified_at")
     private java.sql.Timestamp modifiedAt;
+    
+    
+    @Transient
+    List<Contribution> contributions;
 
     
     @PrePersist

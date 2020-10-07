@@ -60,7 +60,22 @@ public class CampaignService {
 
    }
    
-   public List<Campaign> getCampaigns() throws Exception
+   public List<Campaign> getAdminCampaigns() throws Exception
+   {
+       try {
+    	   String sql = "SELECT * FROM tbl_campaign  order by id desc ";
+			RowMapper<Campaign> rowMapper = new BeanPropertyRowMapper<Campaign>(Campaign.class);
+			List<Campaign> list = jdbcTemplate.query(sql, rowMapper);
+			return list;
+       }catch (Exception ex){
+           LoggerUtil.logError(logger,ex);
+           throw ex;
+       }
+
+
+   }
+   
+   public List<Campaign> getMyCampaigns() throws Exception
    {
        try {
     	   String sql = "SELECT * FROM tbl_campaign  where user_id = ?  order by id desc ";
@@ -84,6 +99,23 @@ public class CampaignService {
 			RowMapper<Campaign> rowMapper = new BeanPropertyRowMapper<Campaign>(Campaign.class);
 			List<Campaign> list = jdbcTemplate.query(sql, rowMapper);
 			return list;
+       }catch (Exception ex){
+           LoggerUtil.logError(logger,ex);
+           throw ex;
+       }
+
+
+   }
+   
+   public Campaign getCampaignById(long id) throws Exception
+   {
+       try {
+    	   String sql = "SELECT * FROM tbl_campaign  where  id = ? ";
+			RowMapper<Campaign> rowMapper = new BeanPropertyRowMapper<Campaign>(Campaign.class);
+			List<Campaign> list = jdbcTemplate.query(sql, rowMapper,id);
+			if(list.size() == 1)
+				return list.get(0);
+			return null;
        }catch (Exception ex){
            LoggerUtil.logError(logger,ex);
            throw ex;
