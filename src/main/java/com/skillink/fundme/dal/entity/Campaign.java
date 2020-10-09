@@ -39,6 +39,8 @@ public class Campaign implements Serializable {
 	private long userId;
 	@Column(name="goal", columnDefinition="Decimal(20,2) default '00.00'")
 	private double goal;
+	@Column(name="donation", columnDefinition="Decimal(20,2) default '00.00'")
+	private double donation;
     private String title;
     private String ownership;
     private String category;

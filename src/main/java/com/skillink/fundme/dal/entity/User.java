@@ -44,7 +44,6 @@ public class User implements Serializable , UserDetails{
 	private String firstName;
     @NotBlank(message = "lastName is required")
 	private String lastName;
-    @Email(message = "Username needs to be an email")
     @NotBlank(message = "username is required")
 	private String username;
     @NotBlank(message = "email is required")

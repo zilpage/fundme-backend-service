@@ -14,11 +14,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.skillink.fundme.dal.entity.Campaign;
 import com.skillink.fundme.dal.entity.Contribution;
-import com.skillink.fundme.dal.entity.Role;
 import com.skillink.fundme.dto.Response;
 import com.skillink.fundme.dto.Result;
 import com.skillink.fundme.exception.BadRequestException;
+import com.skillink.fundme.service.CampaignService;
 import com.skillink.fundme.service.ContributionService;
 import com.skillink.fundme.util.Util;
 
@@ -28,6 +29,9 @@ public class ContributionController {
 	
 	@Autowired
 	ContributionService contributionService;
+	
+	@Autowired
+	CampaignService campaignService;
 
 	@RequestMapping(value = "/contribution", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(value = HttpStatus.CREATED)
@@ -44,9 +48,19 @@ public class ContributionController {
 		if(item.getAmount() < 1)
 			throw new BadRequestException("400", "Amount is missing");
 		
+		if(item.getCampaignId() < 1)
+			throw new BadRequestException("400", "Campaign is missing");
+		
+		Campaign campaign = campaignService.getCampaignById(item.getCampaignId());
+		if (campaign == null) {
+			throw new BadRequestException("400", "Campaign does not exist");
+		}
+		
+		
 		long userId = 0; //Util.getCurrentUserDetail().getId();
 		Contribution createdItem = contributionService.create(item,userId);
-		
+		campaign.setDonation(campaign.getDonation()+item.getAmount());
+		campaignService.update(campaign);
 		Response response = new Response();
 		response.setId(createdItem.getId());
 		

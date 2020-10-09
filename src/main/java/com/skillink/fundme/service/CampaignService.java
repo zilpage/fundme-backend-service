@@ -22,107 +22,104 @@ import com.skillink.fundme.util.Util;
 @Service
 public class CampaignService {
 
-    Logger logger  = LoggerFactory.getLogger(CampaignService.class);
+	Logger logger = LoggerFactory.getLogger(CampaignService.class);
 
-    @Autowired
-    CampaignRepository campaignRepository;
-    
-    @Autowired
+	@Autowired
+	CampaignRepository campaignRepository;
+
+	@Autowired
 	JdbcTemplate jdbcTemplate;
 
-   public Campaign create(Campaign campaign, long userId) throws Exception
-    {
-        try {
-            campaign.setUserId(userId);
-            campaign.setEnabled(false);
-            Campaign campaign1 = campaignRepository.save(campaign);
-            return  campaign1;
-        }catch (Exception ex){
-            LoggerUtil.logError(logger,ex);
-            throw ex;
-        }
+	public Campaign create(Campaign campaign, long userId) throws Exception {
+		try {
+			campaign.setUserId(userId);
+			campaign.setEnabled(false);
+			Campaign campaign1 = campaignRepository.save(campaign);
+			return campaign1;
+		} catch (Exception ex) {
+			LoggerUtil.logError(logger, ex);
+			throw ex;
+		}
 
+	}
 
-    }
-   
-   public Campaign activator(Campaign campaign) throws Exception
-   {
-       try {
-    	   Campaign camp = campaignRepository.getById(campaign.getId());
-    	   camp.setEnabled(campaign.isEnabled());
-    	   camp = campaignRepository.save(camp);
-           return  camp;
-       }catch (Exception ex){
-           LoggerUtil.logError(logger,ex);
-           throw ex;
-       }
+	public void update(Campaign campaign) throws Exception {
+		try {
+			campaignRepository.save(campaign);
 
+		} catch (Exception ex) {
+			LoggerUtil.logError(logger, ex);
+			throw ex;
+		}
 
-   }
-   
-   public List<Campaign> getAdminCampaigns() throws Exception
-   {
-       try {
-    	   String sql = "SELECT * FROM tbl_campaign  order by id desc ";
+	}
+
+	public Campaign activator(Campaign campaign) throws Exception {
+		try {
+			Campaign camp = campaignRepository.getById(campaign.getId());
+			camp.setEnabled(campaign.isEnabled());
+			camp = campaignRepository.save(camp);
+			return camp;
+		} catch (Exception ex) {
+			LoggerUtil.logError(logger, ex);
+			throw ex;
+		}
+
+	}
+
+	public List<Campaign> getAdminCampaigns() throws Exception {
+		try {
+			String sql = "SELECT * FROM tbl_campaign  order by id desc ";
 			RowMapper<Campaign> rowMapper = new BeanPropertyRowMapper<Campaign>(Campaign.class);
 			List<Campaign> list = jdbcTemplate.query(sql, rowMapper);
 			return list;
-       }catch (Exception ex){
-           LoggerUtil.logError(logger,ex);
-           throw ex;
-       }
+		} catch (Exception ex) {
+			LoggerUtil.logError(logger, ex);
+			throw ex;
+		}
 
+	}
 
-   }
-   
-   public List<Campaign> getMyCampaigns() throws Exception
-   {
-       try {
-    	   String sql = "SELECT * FROM tbl_campaign  where user_id = ?  order by id desc ";
-    	   long userId = Util.getCurrentUserDetail().getId();
+	public List<Campaign> getMyCampaigns() throws Exception {
+		try {
+			String sql = "SELECT * FROM tbl_campaign  where user_id = ?  order by id desc ";
+			long userId = Util.getCurrentUserDetail().getId();
 			RowMapper<Campaign> rowMapper = new BeanPropertyRowMapper<Campaign>(Campaign.class);
 			List<Campaign> list = jdbcTemplate.query(sql, rowMapper, userId);
 			return list;
-       }catch (Exception ex){
-           LoggerUtil.logError(logger,ex);
-           throw ex;
-       }
+		} catch (Exception ex) {
+			LoggerUtil.logError(logger, ex);
+			throw ex;
+		}
 
+	}
 
-   }
-   
-   
-   public List<Campaign> getPublicCampaigns() throws Exception
-   {
-       try {
-    	   String sql = "SELECT * FROM tbl_campaign  where  enabled = true order by id desc ";
+	public List<Campaign> getPublicCampaigns() throws Exception {
+		try {
+			String sql = "SELECT * FROM tbl_campaign  where  enabled = true order by id desc ";
 			RowMapper<Campaign> rowMapper = new BeanPropertyRowMapper<Campaign>(Campaign.class);
 			List<Campaign> list = jdbcTemplate.query(sql, rowMapper);
 			return list;
-       }catch (Exception ex){
-           LoggerUtil.logError(logger,ex);
-           throw ex;
-       }
+		} catch (Exception ex) {
+			LoggerUtil.logError(logger, ex);
+			throw ex;
+		}
 
+	}
 
-   }
-   
-   public Campaign getCampaignById(long id) throws Exception
-   {
-       try {
-    	   String sql = "SELECT * FROM tbl_campaign  where  id = ? ";
+	public Campaign getCampaignById(long id) throws Exception {
+		try {
+			String sql = "SELECT * FROM tbl_campaign  where  id = ? ";
 			RowMapper<Campaign> rowMapper = new BeanPropertyRowMapper<Campaign>(Campaign.class);
-			List<Campaign> list = jdbcTemplate.query(sql, rowMapper,id);
-			if(list.size() == 1)
+			List<Campaign> list = jdbcTemplate.query(sql, rowMapper, id);
+			if (list.size() == 1)
 				return list.get(0);
 			return null;
-       }catch (Exception ex){
-           LoggerUtil.logError(logger,ex);
-           throw ex;
-       }
+		} catch (Exception ex) {
+			LoggerUtil.logError(logger, ex);
+			throw ex;
+		}
 
+	}
 
-   }
-   
-   
 }

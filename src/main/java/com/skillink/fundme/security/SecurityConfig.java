@@ -85,7 +85,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/**/*.css",
                         "/**/*.js"
                 ).permitAll()
-                .antMatchers("/api/v1/skilllink/users/**","/api/v1/skilllink/public/**","/api/v1/skilllink/contribution").permitAll()
+                .antMatchers("/api/v1/skilllink/users/**","/api/v1/skilllink/public/**","/api/v1/skilllink/contribution", "/api/v1/skilllink/send/mail","/api/v1/skilllink/campaign/**").permitAll()
                 .anyRequest().authenticated();
 
         http.cors().configurationSource(new CorsConfigurationSource() {

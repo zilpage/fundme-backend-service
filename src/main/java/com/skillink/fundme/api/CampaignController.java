@@ -2,6 +2,7 @@ package com.skillink.fundme.api;
 
 import java.util.List;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,15 +17,15 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.skillink.fundme.dal.entity.Campaign;
-import com.skillink.fundme.dal.entity.Permission;
-import com.skillink.fundme.dal.entity.Role;
 import com.skillink.fundme.dto.Dashboard;
+import com.skillink.fundme.dto.Mail;
 import com.skillink.fundme.dto.Response;
 import com.skillink.fundme.dto.Result;
 import com.skillink.fundme.exception.BadRequestException;
 import com.skillink.fundme.service.AppService;
 import com.skillink.fundme.service.CampaignService;
 import com.skillink.fundme.service.ContributionService;
+import com.skillink.fundme.service.EmailServiceImpl;
 import com.skillink.fundme.util.Util;
 
 @RestController
@@ -39,6 +40,9 @@ public class CampaignController {
 	
 	@Autowired
 	AppService appService;
+	
+	@Autowired
+	EmailServiceImpl emailServiceImpl;
 
 	@RequestMapping(value = "/campaign", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(value = HttpStatus.CREATED)
@@ -134,5 +138,22 @@ public class CampaignController {
 		}
 		campaign.setContributions(contributionService.getContributionsByCampaignId(id));
 		return campaign;
+	}
+	
+	@RequestMapping(value = "/send/mail", method = RequestMethod.GET,  produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseStatus(value = HttpStatus.OK)
+	public void sendMail() {
+
+		Mail mail = new Mail();
+		mail.setBody("Hello");
+		mail.setMailSubject("Test Skill");
+		mail.setMailTo("ionyekanna@gmail.com");
+		mail.setMailFrom("unifiedorbit@gmail.com");
+		try {
+			emailServiceImpl.sendMail(mail);
+		} catch (MessagingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
